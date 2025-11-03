@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Volkswagen Model Finder</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo">
+        <h1>Volkswagen Model Finder</h1>
+        <p>Find your perfect Volkswagen</p>
+      </div>
+      <div class="header-actions">
+        <button id="quizBtn" class="quiz-btn">
+          🚗 Car Quiz
+        </button>
+        <button id="darkModeBtn" class="dark-mode-btn">
+          🌙 Dark Mode
+        </button>
+        <button id="calculatorBtn" class="calculator-btn">
+          💰 Calculator
+        </button>
+        <button id="favoritesBtn" class="favorites-btn">
+          <span class="heart-icon">❤️</span>
+          <span class="btn-text">Favorites</span>
+          <span class="count-badge"><span id="favoritesCount">0</span></span>
+        </button>
+        <button id="clearFavoritesBtn" class="clear-btn" style="display: none;">
+          Clear Favorites
+        </button>
+        <button id="compareBtn" class="compare-btn">
+          <span class="btn-text">Compare</span>
+          <span class="count-badge"><span id="compareCount">0</span></span>
+        </button>
+        <button id="clearCompareBtn" class="clear-btn" style="display: none;">
+          Clear Compare
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="filters">
+      <input type="text" id="search" placeholder="Search by model...">
+      <select id="fuelFilter">
+        <option value="">All Fuels</option>
+        <option value="Petrol">Petrol</option>
+        <option value="Diesel">Diesel</option>
+        <option value="Electric">Electric</option>
+      </select>
+      <input type="number" id="priceFilter" placeholder="Max Price (€)">
+      <input type="number" id="yearFilter" placeholder="Min Year">
+      <select id="sortFilter">
+        <option value="">Sort by...</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+        <option value="year-desc">Newest First</option>
+        <option value="year-asc">Oldest First</option>
+        <option value="horsepower-desc">Most Powerful</option>
+        <option value="horsepower-asc">Least Powerful</option>
+      </select>
+    </div>
+
+    <div class="car-grid" id="carGrid">
+      <!-- Cars will be rendered here -->
+    </div>
+  </div>
+
+  <div id="carModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div id="modalDetails">
+        <!-- Car details will be shown here -->
+      </div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="scripts.js"></script>
+</body>
+</html>
