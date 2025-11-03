@@ -14,12 +14,9 @@ app.use(express.json());
 app.use(express.static('.')); // Serve static files from current directory
 
 // MongoDB connection
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/volkswagen-finder';
-mongoose.connect(mongoURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('Connected to MongoDB'))
+const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://jiittux_db_user:rsAabfHnNrwbIDuI@cluster0.mokasxs.mongodb.net/volkswagen-db?retryWrites=true&w=majority';
+mongoose.connect(mongoURI)
+.then(() => console.log('Connected to MongoDB Atlas'))
 .catch(err => console.error('MongoDB connection error:', err));
 
 // Initialize database with car data
