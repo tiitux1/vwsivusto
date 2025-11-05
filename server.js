@@ -4,6 +4,7 @@ const path = require('path');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const { Car, Review, UserPreferences } = require('./models');
+const dealerships = require('./dealerships');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -340,6 +341,11 @@ app.post('/api/reviews', async (req, res) => {
     console.error('Error saving review:', error);
     res.status(500).json({ error: 'Failed to save review' });
   }
+});
+
+// Dealerships route
+app.get('/api/dealerships', (req, res) => {
+  res.json(dealerships);
 });
 
 // Start server
