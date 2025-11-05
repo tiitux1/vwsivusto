@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', function() {
   let filteredCars = [];
   let favorites = [];
   let compareList = [];
+  let currentLanguage = localStorage.getItem('vwLanguage') || 'en';
+  let dealerships = [];
 
   // Load data from server
   async function loadData() {
@@ -63,6 +65,59 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  // Load dealerships
+  async function loadDealerships() {
+    try {
+      const response = await fetch('/api/dealerships');
+      dealerships = await response.json();
+    } catch (error) {
+      console.error('Error loading dealerships:', error);
+    }
+  }
+
+  // Language switching function
+  function switchLanguage(lang) {
+    currentLanguage = lang;
+    localStorage.setItem('vwLanguage', lang);
+    updateLanguage();
+  }
+
+  // Update all text elements with current language
+  function updateLanguage() {
+    const lang = languages[currentLanguage];
+
+    // Update header
+    document.querySelector('.logo h1').textContent = lang.title;
+    document.querySelector('.logo p').textContent = lang.subtitle;
+
+    // Update buttons
+    document.getElementById('dealershipsBtn').textContent = lang.dealerships;
+    document.getElementById('languageBtn').textContent = lang.language;
+    document.getElementById('quizBtn').textContent = lang.carQuiz;
+    document.getElementById('darkModeBtn').innerHTML = document.body.classList.contains('dark-mode') ? lang.lightMode : lang.darkMode;
+    document.getElementById('calculatorBtn').textContent = lang.calculator;
+    document.querySelector('#favoritesBtn .btn-text').textContent = lang.favorites;
+    document.getElementById('clearFavoritesBtn').textContent = lang.clearFavorites;
+    document.querySelector('#compareBtn .btn-text').textContent = lang.compare;
+    document.getElementById('clearCompareBtn').textContent = lang.clearCompare;
+
+    // Update filters
+    document.getElementById('search').placeholder = lang.searchPlaceholder;
+    document.querySelector('#fuelFilter option[value=""]').textContent = lang.allFuels;
+    document.getElementById('priceFilter').placeholder = lang.maxPrice;
+    document.getElementById('yearFilter').placeholder = lang.minYear;
+    document.querySelector('#sortFilter option[value=""]').textContent = lang.sortBy;
+    document.querySelector('#sortFilter option[value="price-asc"]').textContent = lang.priceLowToHigh;
+    document.querySelector('#sortFilter option[value="price-desc"]').textContent = lang.priceHighToLow;
+    document.querySelector('#sortFilter option[value="year-desc"]').textContent = lang.newestFirst;
+    document.querySelector('#sortFilter option[value="year-asc"]').textContent = lang.oldestFirst;
+    document.querySelector('#sortFilter option[value="horsepower-desc"]').textContent = lang.mostPowerful;
+    document.querySelector('#sortFilter option[value="horsepower-asc"]').textContent = lang.leastPowerful;
+
+    // Re-render cars to update button text
+    renderCars(filteredCars);
+  }
+
   // Save favorites to server
   async function saveFavorites() {
     try {
@@ -94,6 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function renderCars(carsToRender) {
+    const lang = languages[currentLanguage];
     carGrid.innerHTML = '';
     carsToRender.forEach(car => {
       const isFavorite = favorites.includes(car.id);
@@ -115,12 +171,12 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
           </div>
           <p class="price">€${car.price.toLocaleString()}</p>
-          <p>Year: ${car.year}</p>
-          <p>Engine: ${car.engine}</p>
-          <p>Horsepower: ${car.horsepower} hp</p>
-          <p>Fuel: ${car.fuel}</p>
-          ${car.averageRating ? `<p>Rating: ⭐ ${car.averageRating} (${car.reviewCount} reviews)</p>` : ''}
-          <button onclick="showCarDetails(${car.id})">View Details</button>
+          <p>${lang.year}: ${car.year}</p>
+          <p>${lang.engine}: ${car.engine}</p>
+          <p>${lang.horsepower}: ${car.horsepower} hp</p>
+          <p>${lang.fuel}: ${car.fuel}</p>
+          ${car.averageRating ? `<p>${lang.rating}: ⭐ ${car.averageRating} (${car.reviewCount} ${lang.reviews})</p>` : ''}
+          <button onclick="showCarDetails(${car.id})">${lang.viewDetails}</button>
         </div>
       `;
       carGrid.appendChild(carCard);
@@ -170,6 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
   window.showCarDetails = async function(carId) {
     const car = cars.find(c => c.id === carId);
     if (car) {
+      const lang = languages[currentLanguage];
       // Load reviews for this car
       let reviews = [];
       try {
@@ -185,17 +242,17 @@ document.addEventListener('DOMContentLoaded', function() {
           <h2>${car.model}</h2>
           <p>${car.description}</p>
           <table class="specs-table">
-            <tr><th>Year</th><td>${car.year}</td></tr>
-            <tr><th>Price</th><td>€${car.price.toLocaleString()}</td></tr>
-            <tr><th>Engine</th><td>${car.engine}</td></tr>
-            <tr><th>Horsepower</th><td>${car.horsepower} hp</td></tr>
-            <tr><th>Transmission</th><td>${car.transmission}</td></tr>
-            <tr><th>Fuel</th><td>${car.fuel}</td></tr>
-            ${car.averageRating ? `<tr><th>Rating</th><td>⭐ ${car.averageRating} (${car.reviewCount} reviews)</td></tr>` : ''}
+            <tr><th>${lang.year}</th><td>${car.year}</td></tr>
+            <tr><th>${lang.price}</th><td>€${car.price.toLocaleString()}</td></tr>
+            <tr><th>${lang.engine}</th><td>${car.engine}</td></tr>
+            <tr><th>${lang.horsepower}</th><td>${car.horsepower} hp</td></tr>
+            <tr><th>${lang.transmission}</th><td>${car.transmission}</td></tr>
+            <tr><th>${lang.fuel}</th><td>${car.fuel}</td></tr>
+            ${car.averageRating ? `<tr><th>${lang.rating}</th><td>⭐ ${car.averageRating} (${car.reviewCount} ${lang.reviews})</td></tr>` : ''}
           </table>
 
           <div class="reviews-section">
-            <h3>Customer Reviews</h3>
+            <h3>${lang.customerReviews}</h3>
             <div id="reviewsList">
               ${reviews.length > 0 ? reviews.map(review => `
                 <div class="review-item">
@@ -206,16 +263,16 @@ document.addEventListener('DOMContentLoaded', function() {
                   <p class="review-comment">${review.comment}</p>
                   <small class="review-user">By: ${review.userId}</small>
                 </div>
-              `).join('') : '<p>No reviews yet. Be the first to review!</p>'}
+              `).join('') : `<p>${lang.noReviews}</p>`}
             </div>
 
             <div class="add-review">
-              <h4>Add Your Review</h4>
+              <h4>${lang.addReview}</h4>
               <form id="reviewForm" onsubmit="submitReview(event, ${carId})">
                 <div class="rating-input">
-                  <label>Rating:</label>
+                  <label>${lang.selectRating}:</label>
                   <select id="reviewRating" required>
-                    <option value="">Select rating</option>
+                    <option value="">${lang.selectRating}</option>
                     <option value="5">⭐⭐⭐⭐⭐ (5)</option>
                     <option value="4">⭐⭐⭐⭐ (4)</option>
                     <option value="3">⭐⭐⭐ (3)</option>
@@ -224,10 +281,10 @@ document.addEventListener('DOMContentLoaded', function() {
                   </select>
                 </div>
                 <div class="comment-input">
-                  <label>Comment:</label>
-                  <textarea id="reviewComment" placeholder="Share your thoughts about this car..." required></textarea>
+                  <label>${lang.shareThoughts}:</label>
+                  <textarea id="reviewComment" placeholder="${lang.shareThoughts}" required></textarea>
                 </div>
-                <button type="submit" class="submit-review-btn">Submit Review</button>
+                <button type="submit" class="submit-review-btn">${lang.submitReview}</button>
               </form>
             </div>
           </div>
@@ -266,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (compareList.length < 2) {
       compareList.push(carId);
     } else {
-      alert('You can compare maximum 2 cars at a time.');
+      alert(languages[currentLanguage].maxTwoCars);
       return;
     }
     saveCompare();
@@ -309,6 +366,14 @@ document.addEventListener('DOMContentLoaded', function() {
   sortFilter.addEventListener('change', filterAndSortCars);
 
   // Header button event listeners
+  document.getElementById('dealershipsBtn').addEventListener('click', function() {
+    showDealerships();
+  });
+
+  document.getElementById('languageBtn').addEventListener('click', function() {
+    showLanguageSelector();
+  });
+
   document.getElementById('quizBtn').addEventListener('click', function() {
     startCarQuiz();
   });
@@ -322,8 +387,9 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   document.getElementById('favoritesBtn').addEventListener('click', function() {
+    const lang = languages[currentLanguage];
     if (favorites.length === 0) {
-      alert('No favorites added yet!');
+      alert(lang.noFavorites);
       return;
     }
     const favoriteCars = cars.filter(car => favorites.includes(car.id));
@@ -331,7 +397,8 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   document.getElementById('clearFavoritesBtn').addEventListener('click', function() {
-    if (confirm('Are you sure you want to clear all favorites?')) {
+    const lang = languages[currentLanguage];
+    if (confirm(lang.confirmClearFavorites)) {
       favorites = [];
       saveFavorites();
       updateFavoritesCount();
@@ -341,15 +408,17 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   document.getElementById('compareBtn').addEventListener('click', function() {
+    const lang = languages[currentLanguage];
     if (compareList.length < 2) {
-      alert('Please select 2 cars to compare!');
+      alert(lang.selectTwoCars);
       return;
     }
     showComparison();
   });
 
   document.getElementById('clearCompareBtn').addEventListener('click', function() {
-    if (confirm('Are you sure you want to clear all compared cars?')) {
+    const lang = languages[currentLanguage];
+    if (confirm(lang.confirmClearCompare)) {
       compareList = [];
       saveCompare();
       updateCompareCount();
@@ -358,36 +427,77 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
+  function showDealerships() {
+    const lang = languages[currentLanguage];
+    modalDetails.innerHTML = `
+      <div class="dealerships-modal">
+        <h2>${lang.dealerships}</h2>
+        <div class="dealerships-grid">
+          ${dealerships.map(dealer => `
+            <div class="dealership-card">
+              <h3>${dealer.name}</h3>
+              <p><strong>${lang.address}:</strong> ${dealer.address}</p>
+              <p><strong>${lang.phone}:</strong> ${dealer.phone}</p>
+              <p><strong>${lang.email}:</strong> ${dealer.email}</p>
+              <p><strong>${lang.services}:</strong> ${dealer.services.join(', ')}</p>
+              <a href="${dealer.website}" target="_blank" class="dealer-website">${lang.website}</a>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    modal.style.display = 'block';
+  }
+
+  function showLanguageSelector() {
+    const lang = languages[currentLanguage];
+    modalDetails.innerHTML = `
+      <div class="language-modal">
+        <h2>${lang.language}</h2>
+        <div class="language-options">
+          <button onclick="switchLanguage('en')" class="language-option ${currentLanguage === 'en' ? 'active' : ''}">
+            🇺🇸 ${lang.english}
+          </button>
+          <button onclick="switchLanguage('fi')" class="language-option ${currentLanguage === 'fi' ? 'active' : ''}">
+            🇫🇮 ${lang.finnish}
+          </button>
+        </div>
+      </div>
+    `;
+    modal.style.display = 'block';
+  }
+
   function showComparison() {
+    const lang = languages[currentLanguage];
     const car1 = cars.find(c => c.id === compareList[0]);
     const car2 = cars.find(c => c.id === compareList[1]);
     if (car1 && car2) {
       modalDetails.innerHTML = `
         <div class="comparison-modal">
-          <h2>Car Comparison</h2>
+          <h2>${lang.carComparison}</h2>
           <div class="comparison-container">
             <div class="comparison-car">
               <img src="${car1.image}" alt="${car1.model}">
               <h3>${car1.model}</h3>
               <table class="specs-table">
-                <tr><th>Year</th><td>${car1.year}</td></tr>
-                <tr><th>Price</th><td>€${car1.price.toLocaleString()}</td></tr>
-                <tr><th>Engine</th><td>${car1.engine}</td></tr>
-                <tr><th>Horsepower</th><td>${car1.horsepower} hp</td></tr>
-                <tr><th>Transmission</th><td>${car1.transmission}</td></tr>
-                <tr><th>Fuel</th><td>${car1.fuel}</td></tr>
+                <tr><th>${lang.year}</th><td>${car1.year}</td></tr>
+                <tr><th>${lang.price}</th><td>€${car1.price.toLocaleString()}</td></tr>
+                <tr><th>${lang.engine}</th><td>${car1.engine}</td></tr>
+                <tr><th>${lang.horsepower}</th><td>${car1.horsepower} hp</td></tr>
+                <tr><th>${lang.transmission}</th><td>${car1.transmission}</td></tr>
+                <tr><th>${lang.fuel}</th><td>${car1.fuel}</td></tr>
               </table>
             </div>
             <div class="comparison-car">
               <img src="${car2.image}" alt="${car2.model}">
               <h3>${car2.model}</h3>
               <table class="specs-table">
-                <tr><th>Year</th><td>${car2.year}</td></tr>
-                <tr><th>Price</th><td>€${car2.price.toLocaleString()}</td></tr>
-                <tr><th>Engine</th><td>${car2.engine}</td></tr>
-                <tr><th>Horsepower</th><td>${car2.horsepower} hp</td></tr>
-                <tr><th>Transmission</th><td>${car2.transmission}</td></tr>
-                <tr><th>Fuel</th><td>${car2.fuel}</td></tr>
+                <tr><th>${lang.year}</th><td>${car2.year}</td></tr>
+                <tr><th>${lang.price}</th><td>€${car2.price.toLocaleString()}</td></tr>
+                <tr><th>${lang.engine}</th><td>${car2.engine}</td></tr>
+                <tr><th>${lang.horsepower}</th><td>${car2.horsepower} hp</td></tr>
+                <tr><th>${lang.transmission}</th><td>${car2.transmission}</td></tr>
+                <tr><th>${lang.fuel}</th><td>${car2.fuel}</td></tr>
               </table>
             </div>
           </div>
@@ -398,6 +508,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function startCarQuiz() {
+    const lang = languages[currentLanguage];
     const quizQuestions = [
       {
         question: "Which Volkswagen model is known for its iconic 'Beetle' shape?",
@@ -433,7 +544,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const question = quizQuestions[currentQuestion];
       modalDetails.innerHTML = `
         <div class="quiz-modal">
-          <h2>Volkswagen Car Quiz</h2>
+          <h2>${lang.carQuiz}</h2>
           <div class="quiz-progress">Question ${currentQuestion + 1} of ${quizQuestions.length}</div>
           <div class="quiz-score">Score: ${score}/${quizQuestions.length}</div>
           <div class="quiz-question">${question.question}</div>
@@ -465,20 +576,20 @@ document.addEventListener('DOMContentLoaded', function() {
       const percentage = Math.round((score / quizQuestions.length) * 100);
       let message = "";
       if (percentage >= 80) {
-        message = "🏆 Excellent! You're a Volkswagen expert!";
+        message = lang.excellent;
       } else if (percentage >= 60) {
-        message = "👍 Good job! You know your Volkswagens!";
+        message = lang.goodJob;
       } else {
-        message = "📚 Keep learning about Volkswagen cars!";
+        message = lang.keepLearning;
       }
 
       modalDetails.innerHTML = `
         <div class="quiz-modal">
-          <h2>Quiz Complete!</h2>
+          <h2>${lang.quizComplete}</h2>
           <div class="quiz-results">
-            <div class="final-score">Final Score: ${score}/${quizQuestions.length} (${percentage}%)</div>
+            <div class="final-score">${lang.finalScore} ${score}/${quizQuestions.length} (${percentage}%)</div>
             <div class="quiz-message">${message}</div>
-            <button onclick="startCarQuiz()" class="quiz-restart">Take Quiz Again</button>
+            <button onclick="startCarQuiz()" class="quiz-restart">${lang.takeQuizAgain}</button>
           </div>
         </div>
       `;
@@ -494,38 +605,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update button text
     const darkModeBtn = document.getElementById('darkModeBtn');
-    darkModeBtn.innerHTML = isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode';
+    darkModeBtn.innerHTML = isDarkMode ? languages[currentLanguage].lightMode : languages[currentLanguage].darkMode;
   }
 
   function showCalculator() {
+    const lang = languages[currentLanguage];
     modalDetails.innerHTML = `
       <div class="calculator-modal">
-        <h2>Car Financing Calculator</h2>
+        <h2>${lang.carFinancingCalculator}</h2>
         <div class="calculator-form">
           <div class="calc-input">
-            <label>Car Price (€):</label>
+            <label>${lang.carPrice}</label>
             <input type="number" id="calcPrice" placeholder="50000">
           </div>
           <div class="calc-input">
-            <label>Down Payment (€):</label>
+            <label>${lang.downPayment}</label>
             <input type="number" id="calcDownPayment" placeholder="10000">
           </div>
           <div class="calc-input">
-            <label>Loan Term (years):</label>
+            <label>${lang.loanTerm}</label>
             <input type="number" id="calcYears" placeholder="5">
           </div>
           <div class="calc-input">
-            <label>Interest Rate (%):</label>
+            <label>${lang.interestRate}</label>
             <input type="number" id="calcRate" placeholder="5.5" step="0.1">
           </div>
-          <button onclick="calculateLoan()" class="calc-btn">Calculate</button>
+          <button onclick="calculateLoan()" class="calc-btn">${lang.calculate}</button>
         </div>
         <div id="calcResults" class="calc-results" style="display: none;">
-          <h3>Monthly Payment: <span id="monthlyPayment">€0</span></h3>
+          <h3>${lang.monthlyPayment} <span id="monthlyPayment">€0</span></h3>
           <div class="calc-breakdown">
-            <p>Total Loan Amount: <span id="totalLoan">€0</span></p>
-            <p>Total Interest: <span id="totalInterest">€0</span></p>
-            <p>Total Payment: <span id="totalPayment">€0</span></p>
+            <p>${lang.totalLoanAmount} <span id="totalLoan">€0</span></p>
+            <p>${lang.totalInterest} <span id="totalInterest">€0</span></p>
+            <p>${lang.totalPayment} <span id="totalPayment">€0</span></p>
           </div>
         </div>
       </div>
@@ -559,11 +671,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // Load dark mode preference
   if (localStorage.getItem('vwDarkMode') === 'true') {
     document.body.classList.add('dark-mode');
-    document.getElementById('darkModeBtn').innerHTML = '☀️ Light Mode';
+    document.getElementById('darkModeBtn').innerHTML = languages[currentLanguage].lightMode;
   }
 
   window.submitReview = async function(event, carId) {
     event.preventDefault();
+    const lang = languages[currentLanguage];
 
     const rating = document.getElementById('reviewRating').value;
     const comment = document.getElementById('reviewComment').value;
@@ -576,20 +689,22 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
       if (response.ok) {
-        alert('Review submitted successfully!');
+        alert(lang.reviewSubmitted);
         // Reload the car details to show the new review
         showCarDetails(carId);
         // Reload cars to update ratings
         loadData();
       } else {
-        alert('Failed to submit review. Please try again.');
+        alert(lang.failedSubmitReview);
       }
     } catch (error) {
       console.error('Error submitting review:', error);
-      alert('Error submitting review. Please try again.');
+      alert(lang.errorSubmitReview);
     }
   };
 
   // Initial setup
   loadData();
+  loadDealerships();
+  updateLanguage();
 });
