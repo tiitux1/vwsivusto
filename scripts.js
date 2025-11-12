@@ -1,3 +1,55 @@
+let currentLanguage = localStorage.getItem('vwLanguage') || 'en';
+
+// Language switching function
+window.switchLanguage = function(lang) {
+  currentLanguage = lang;
+  localStorage.setItem('vwLanguage', lang);
+  updateLanguage();
+  const modal = document.getElementById('carModal');
+  modal.style.display = 'none'; // Close the modal after switching language
+};
+
+// Update all text elements with current language
+function updateLanguage() {
+  const lang = languages[currentLanguage];
+  if (!lang) {
+    console.error('Language not found:', currentLanguage);
+    currentLanguage = 'en'; // Fallback to English
+    return updateLanguage();
+  }
+
+  // Update header
+  document.querySelector('.logo h1').textContent = lang.title;
+  document.querySelector('.logo p').textContent = lang.subtitle;
+
+  // Update buttons
+  document.getElementById('languageBtn').textContent = lang.language;
+  document.getElementById('quizBtn').textContent = lang.carQuiz;
+  document.getElementById('darkModeBtn').innerHTML = document.body.classList.contains('dark-mode') ? lang.lightMode : lang.darkMode;
+  document.getElementById('calculatorBtn').textContent = lang.calculator;
+  document.querySelector('#favoritesBtn .btn-text').textContent = lang.favorites;
+  document.getElementById('clearFavoritesBtn').textContent = lang.clearFavorites;
+  document.querySelector('#compareBtn .btn-text').textContent = lang.compare;
+  document.getElementById('clearCompareBtn').textContent = lang.clearCompare;
+
+  // Update filters
+  document.getElementById('search').placeholder = lang.searchPlaceholder;
+  document.querySelector('#fuelFilter option[value=""]').textContent = lang.allFuels;
+  document.getElementById('priceFilter').placeholder = lang.maxPrice;
+  document.getElementById('yearFilter').placeholder = lang.minYear;
+  document.querySelector('#sortFilter option[value=""]').textContent = lang.sortBy;
+  document.querySelector('#sortFilter option[value="price-asc"]').textContent = lang.priceLowToHigh;
+  document.querySelector('#sortFilter option[value="price-desc"]').textContent = lang.priceHighToLow;
+  document.querySelector('#sortFilter option[value="year-desc"]').textContent = lang.newestFirst;
+  document.querySelector('#sortFilter option[value="year-asc"]').textContent = lang.oldestFirst;
+  document.querySelector('#sortFilter option[value="horsepower-desc"]').textContent = lang.mostPowerful;
+  document.querySelector('#sortFilter option[value="horsepower-asc"]').textContent = lang.leastPowerful;
+
+  // Re-render cars to update button text
+  const filteredCars = window.filteredCars || [];
+  renderCars(filteredCars);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   const carGrid = document.getElementById('carGrid');
   const searchInput = document.getElementById('search');
@@ -13,8 +65,8 @@ document.addEventListener('DOMContentLoaded', function() {
   let filteredCars = [];
   let favorites = [];
   let compareList = [];
-  let currentLanguage = localStorage.getItem('vwLanguage') || 'en';
 
+  window.filteredCars = filteredCars; // Make it global for updateLanguage
 
   // Load data from server
   async function loadData() {
@@ -30,6 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
       compareList = await compareResponse.json();
 
       filteredCars = [...cars];
+      window.filteredCars = filteredCars;
       renderCars(filteredCars);
       updateFavoritesCount();
       updateCompareCount();
@@ -59,6 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
       ];
 
       filteredCars = [...cars];
+      window.filteredCars = filteredCars;
       renderCars(filteredCars);
       updateFavoritesCount();
       updateCompareCount();
@@ -66,54 +120,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
 
-
-  // Language switching function
-  function switchLanguage(lang) {
-    currentLanguage = lang;
-    localStorage.setItem('vwLanguage', lang);
-    updateLanguage();
-    modal.style.display = 'none'; // Close the modal after switching language
-  }
-
-  // Update all text elements with current language
-  function updateLanguage() {
-    const lang = languages[currentLanguage];
-    if (!lang) {
-      console.error('Language not found:', currentLanguage);
-      currentLanguage = 'en'; // Fallback to English
-      return updateLanguage();
-    }
-
-    // Update header
-    document.querySelector('.logo h1').textContent = lang.title;
-    document.querySelector('.logo p').textContent = lang.subtitle;
-
-    // Update buttons
-    document.getElementById('languageBtn').textContent = lang.language;
-    document.getElementById('quizBtn').textContent = lang.carQuiz;
-    document.getElementById('darkModeBtn').innerHTML = document.body.classList.contains('dark-mode') ? lang.lightMode : lang.darkMode;
-    document.getElementById('calculatorBtn').textContent = lang.calculator;
-    document.querySelector('#favoritesBtn .btn-text').textContent = lang.favorites;
-    document.getElementById('clearFavoritesBtn').textContent = lang.clearFavorites;
-    document.querySelector('#compareBtn .btn-text').textContent = lang.compare;
-    document.getElementById('clearCompareBtn').textContent = lang.clearCompare;
-
-    // Update filters
-    document.getElementById('search').placeholder = lang.searchPlaceholder;
-    document.querySelector('#fuelFilter option[value=""]').textContent = lang.allFuels;
-    document.getElementById('priceFilter').placeholder = lang.maxPrice;
-    document.getElementById('yearFilter').placeholder = lang.minYear;
-    document.querySelector('#sortFilter option[value=""]').textContent = lang.sortBy;
-    document.querySelector('#sortFilter option[value="price-asc"]').textContent = lang.priceLowToHigh;
-    document.querySelector('#sortFilter option[value="price-desc"]').textContent = lang.priceHighToLow;
-    document.querySelector('#sortFilter option[value="year-desc"]').textContent = lang.newestFirst;
-    document.querySelector('#sortFilter option[value="year-asc"]').textContent = lang.oldestFirst;
-    document.querySelector('#sortFilter option[value="horsepower-desc"]').textContent = lang.mostPowerful;
-    document.querySelector('#sortFilter option[value="horsepower-asc"]').textContent = lang.leastPowerful;
-
-    // Re-render cars to update button text
-    renderCars(filteredCars);
-  }
 
   // Save favorites to server
   async function saveFavorites() {
@@ -429,10 +435,10 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="language-modal">
         <h2>${lang ? lang.language : '🌐 Language'}</h2>
         <div class="language-options">
-          <button onclick="switchLanguage('en')" class="language-option ${currentLanguage === 'en' ? 'active' : ''}">
+          <button onclick="window.switchLanguage('en')" class="language-option ${currentLanguage === 'en' ? 'active' : ''}">
             🇺🇸 ${lang ? lang.english : 'English'}
           </button>
-          <button onclick="switchLanguage('fi')" class="language-option ${currentLanguage === 'fi' ? 'active' : ''}">
+          <button onclick="window.switchLanguage('fi')" class="language-option ${currentLanguage === 'fi' ? 'active' : ''}">
             🇫🇮 ${lang ? lang.finnish : 'Suomi'}
           </button>
         </div>

@@ -3,8 +3,6 @@ const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const { Car, Review, UserPreferences } = require('./models');
-const dealerships = require('./dealerships');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,10 +13,47 @@ app.use(express.json());
 app.use(express.static('.')); // Serve static files from current directory
 
 // MongoDB connection
-const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://jiittux_db_user:rsAabfHnNrwbIDuI@cluster0.mokasxs.mongodb.net/volkswagen-db?retryWrites=true&w=majority';
+const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/volkswagen-db';
 mongoose.connect(mongoURI)
-.then(() => console.log('Connected to MongoDB Atlas'))
+.then(() => console.log('Connected to MongoDB'))
 .catch(err => console.error('MongoDB connection error:', err));
+
+// Car Schema
+const CarSchema = new mongoose.Schema({
+  id: { type: Number, required: true, unique: true },
+  model: { type: String, required: true },
+  year: { type: Number, required: true },
+  price: { type: Number, required: true },
+  engine: { type: String, required: true },
+  horsepower: { type: Number, required: true },
+  transmission: { type: String, required: true },
+  fuel: { type: String, required: true },
+  image: { type: String, required: true },
+  description: { type: String, required: true },
+  averageRating: { type: String },
+  reviewCount: { type: Number, default: 0 }
+});
+
+// Review Schema
+const ReviewSchema = new mongoose.Schema({
+  carId: { type: Number, required: true },
+  userId: { type: String, required: true },
+  rating: { type: Number, required: true, min: 1, max: 5 },
+  comment: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+// User Preferences Schema
+const UserPreferencesSchema = new mongoose.Schema({
+  userId: { type: String, required: true, unique: true },
+  favorites: [{ type: Number }],
+  compare: [{ type: Number }]
+});
+
+// Models
+const Car = mongoose.models.Car || mongoose.model('Car', CarSchema);
+const Review = mongoose.models.Review || mongoose.model('Review', ReviewSchema);
+const UserPreferences = mongoose.models.UserPreferences || mongoose.model('UserPreferences', UserPreferencesSchema);
 
 // Initialize database with car data
 async function initializeDatabase() {
