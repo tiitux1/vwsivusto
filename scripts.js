@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let favorites = [];
   let compareList = [];
   let currentLanguage = localStorage.getItem('vwLanguage') || 'en';
-  let dealerships = [];
+
 
   // Load data from server
   async function loadData() {
@@ -65,21 +65,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Load dealerships
-  async function loadDealerships() {
-    try {
-      const response = await fetch('/api/dealerships');
-      dealerships = await response.json();
-    } catch (error) {
-      console.error('Error loading dealerships:', error);
-    }
-  }
+
 
   // Language switching function
   function switchLanguage(lang) {
     currentLanguage = lang;
     localStorage.setItem('vwLanguage', lang);
     updateLanguage();
+    modal.style.display = 'none'; // Close the modal after switching language
   }
 
   // Update all text elements with current language
@@ -96,7 +89,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('.logo p').textContent = lang.subtitle;
 
     // Update buttons
-    document.getElementById('dealershipsBtn').textContent = lang.dealerships;
     document.getElementById('languageBtn').textContent = lang.language;
     document.getElementById('quizBtn').textContent = lang.carQuiz;
     document.getElementById('darkModeBtn').innerHTML = document.body.classList.contains('dark-mode') ? lang.lightMode : lang.darkMode;
@@ -370,10 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
   yearFilter.addEventListener('input', filterAndSortCars);
   sortFilter.addEventListener('change', filterAndSortCars);
 
-  // Header button event listeners
-  document.getElementById('dealershipsBtn').addEventListener('click', function() {
-    showDealerships();
-  });
+
 
   document.getElementById('languageBtn').addEventListener('click', function() {
     showLanguageSelector();
@@ -432,27 +421,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  function showDealerships() {
-    const lang = languages[currentLanguage];
-    modalDetails.innerHTML = `
-      <div class="dealerships-modal">
-        <h2>${lang ? lang.dealerships : '🏢 Dealerships'}</h2>
-        <div class="dealerships-grid">
-          ${dealerships.map(dealer => `
-            <div class="dealership-card">
-              <h3>${dealer.name}</h3>
-              <p><strong>${lang ? lang.address : 'Address'}:</strong> ${dealer.address}</p>
-              <p><strong>${lang ? lang.phone : 'Phone'}:</strong> ${dealer.phone}</p>
-              <p><strong>${lang ? lang.email : 'Email'}:</strong> ${dealer.email}</p>
-              <p><strong>${lang ? lang.services : 'Services'}:</strong> ${dealer.services.join(', ')}</p>
-              <a href="${dealer.website}" target="_blank" class="dealer-website">${lang ? lang.website : 'Website'}</a>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `;
-    modal.style.display = 'block';
-  }
+
 
   function showLanguageSelector() {
     const lang = languages[currentLanguage];
@@ -710,6 +679,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Initial setup
   loadData();
-  loadDealerships();
   updateLanguage();
 });
