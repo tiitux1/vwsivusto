@@ -23,7 +23,7 @@ function updateLanguage() {
   document.querySelector('.logo p').textContent = lang.subtitle;
 
   // Update buttons
-  document.getElementById('languageBtn').textContent = lang.language;
+  document.getElementById('languageBtn').textContent = "🌐 " + currentLanguage.toUpperCase();
   document.getElementById('quizBtn').textContent = lang.carQuiz;
   document.getElementById('darkModeBtn').innerHTML = document.body.classList.contains('dark-mode') ? lang.lightMode : lang.darkMode;
   document.getElementById('calculatorBtn').textContent = lang.calculator;
@@ -68,87 +68,47 @@ document.addEventListener('DOMContentLoaded', function() {
 
   window.filteredCars = filteredCars; // Make it global for updateLanguage
 
-  // Load data from server
-  async function loadData() {
-    try {
-      const [carsResponse, favoritesResponse, compareResponse] = await Promise.all([
-        fetch('/api/cars'),
-        fetch('/api/favorites'),
-        fetch('/api/compare')
-      ]);
+  // Load data from localStorage
+  function loadData() {
+    favorites = JSON.parse(localStorage.getItem('vwFavorites')) || [];
+    compareList = JSON.parse(localStorage.getItem('vwCompare')) || [];
 
-      cars = await carsResponse.json();
-      favorites = await favoritesResponse.json();
-      compareList = await compareResponse.json();
+    // Embedded car data
+    cars = [
+      { id: 1, model: "Golf GTI", year: 2023, price: 38990, engine: "2.0L Turbo", horsepower: 245, transmission: "Automatic DSG", fuel: "Petrol", image: "images/golf-gti.jpg", description: "Iconic sporty hatchback combining performance and style." },
+      { id: 2, model: "Passat", year: 2023, price: 32990, engine: "1.5L Turbo", horsepower: 150, transmission: "Manual", fuel: "Petrol", image: "images/passat-lol.jpg", description: "Comfortable family sedan with modern features." },
+      { id: 3, model: "ID.4", year: 2023, price: 45990, engine: "Electric Motor", horsepower: 201, transmission: "Automatic", fuel: "Electric", image: "images/id4.jpg", description: "All-electric SUV with impressive range and tech." },
+      { id: 4, model: "Polo", year: 2023, price: 19990, engine: "1.0L Turbo", horsepower: 95, transmission: "Manual", fuel: "Petrol", image: "images/polo.jpg", description: "Compact and efficient city car." },
+      { id: 5, model: "Tiguan", year: 2023, price: 35990, engine: "2.0L Diesel", horsepower: 150, transmission: "Automatic", fuel: "Diesel", image: "images/tiguan.jpg", description: "Versatile SUV for family adventures." },
+      { id: 6, model: "Arteon", year: 2023, price: 41990, engine: "2.0L Turbo", horsepower: 190, transmission: "Automatic DSG", fuel: "Petrol", image: "images/arteon.jpg", description: "Elegant fastback with premium interior." },
+      { id: 7, model: "Touareg", year: 2023, price: 69990, engine: "3.0L V6 Diesel", horsepower: 286, transmission: "Automatic", fuel: "Diesel", image: "images/touareg.jpg", description: "Luxury SUV with off-road capabilities and premium comfort." },
+      { id: 8, model: "Golf R", year: 2023, price: 52990, engine: "2.0L Turbo", horsepower: 320, transmission: "Automatic DSG", fuel: "Petrol", image: "images/golf-r.jpg", description: "High-performance version of the Golf with all-wheel drive." },
+      { id: 9, model: "ID.3", year: 2023, price: 39990, engine: "Electric Motor", horsepower: 204, transmission: "Automatic", fuel: "Electric", image: "images/id3.jpg", description: "Compact electric hatchback with modern design." },
+      { id: 10, model: "T-Roc", year: 2023, price: 28990, engine: "1.5L Turbo", horsepower: 150, transmission: "Manual", fuel: "Petrol", image: "images/t-roc.jpg", description: "Stylish compact SUV with urban appeal." },
+      { id: 11, model: "Sharan", year: 2023, price: 44990, engine: "2.0L Diesel", horsepower: 150, transmission: "Automatic DSG", fuel: "Diesel", image: "images/sharan.jpg", description: "Spacious family MPV with sliding doors." },
+      { id: 12, model: "Caddy", year: 2023, price: 31990, engine: "2.0L Diesel", horsepower: 122, transmission: "Manual", fuel: "Diesel", image: "images/caddy.jpg", description: "Versatile commercial vehicle perfect for business use." },
+      { id: 13, model: "Amarok", year: 2023, price: 49990, engine: "3.0L V6 Diesel", horsepower: 224, transmission: "Automatic", fuel: "Diesel", image: "images/amarok.jpg", description: "Robust pickup truck for work and adventure." },
+      { id: 14, model: "Taos", year: 2023, price: 32990, engine: "1.5L Turbo", horsepower: 158, transmission: "Automatic", fuel: "Petrol", image: "images/taos.jpg", description: "Compact crossover SUV with modern features." },
+      { id: 15, model: "Atlas", year: 2023, price: 41990, engine: "2.0L Turbo", horsepower: 235, transmission: "Automatic", fuel: "Petrol", image: "images/atlas.jpg", description: "Large family SUV with three rows of seating." }
+    ];
 
-      filteredCars = [...cars];
-      window.filteredCars = filteredCars;
-      renderCars(filteredCars);
-      updateFavoritesCount();
-      updateCompareCount();
-    } catch (error) {
-      console.error('Error loading data:', error);
-      // Fallback to localStorage if server is down
-      favorites = JSON.parse(localStorage.getItem('vwFavorites')) || [];
-      compareList = JSON.parse(localStorage.getItem('vwCompare')) || [];
-
-      // Fallback car data (embedded in script for offline use)
-      cars = [
-        { id: 1, model: "Golf GTI", year: 2023, price: 38990, engine: "2.0L Turbo", horsepower: 245, transmission: "Automatic DSG", fuel: "Petrol", image: "images/golf-gti.jpg", description: "Iconic sporty hatchback combining performance and style." },
-        { id: 2, model: "Passat", year: 2023, price: 32990, engine: "1.5L Turbo", horsepower: 150, transmission: "Manual", fuel: "Petrol", image: "images/passat-lol.jpg", description: "Comfortable family sedan with modern features." },
-        { id: 3, model: "ID.4", year: 2023, price: 45990, engine: "Electric Motor", horsepower: 201, transmission: "Automatic", fuel: "Electric", image: "images/id4.jpg", description: "All-electric SUV with impressive range and tech." },
-        { id: 4, model: "Polo", year: 2023, price: 19990, engine: "1.0L Turbo", horsepower: 95, transmission: "Manual", fuel: "Petrol", image: "images/polo.jpg", description: "Compact and efficient city car." },
-        { id: 5, model: "Tiguan", year: 2023, price: 35990, engine: "2.0L Diesel", horsepower: 150, transmission: "Automatic", fuel: "Diesel", image: "images/tiguan.jpg", description: "Versatile SUV for family adventures." },
-        { id: 6, model: "Arteon", year: 2023, price: 41990, engine: "2.0L Turbo", horsepower: 190, transmission: "Automatic DSG", fuel: "Petrol", image: "images/arteon.jpg", description: "Elegant fastback with premium interior." },
-        { id: 7, model: "Touareg", year: 2023, price: 69990, engine: "3.0L V6 Diesel", horsepower: 286, transmission: "Automatic", fuel: "Diesel", image: "images/touareg.jpg", description: "Luxury SUV with off-road capabilities and premium comfort." },
-        { id: 8, model: "Golf R", year: 2023, price: 52990, engine: "2.0L Turbo", horsepower: 320, transmission: "Automatic DSG", fuel: "Petrol", image: "images/golf-r.jpg", description: "High-performance version of the Golf with all-wheel drive." },
-        { id: 9, model: "ID.3", year: 2023, price: 39990, engine: "Electric Motor", horsepower: 204, transmission: "Automatic", fuel: "Electric", image: "images/id3.jpg", description: "Compact electric hatchback with modern design." },
-        { id: 10, model: "T-Roc", year: 2023, price: 28990, engine: "1.5L Turbo", horsepower: 150, transmission: "Manual", fuel: "Petrol", image: "images/t-roc.jpg", description: "Stylish compact SUV with urban appeal." },
-        { id: 11, model: "Sharan", year: 2023, price: 44990, engine: "2.0L Diesel", horsepower: 150, transmission: "Automatic DSG", fuel: "Diesel", image: "images/sharan.jpg", description: "Spacious family MPV with sliding doors." },
-        { id: 12, model: "Caddy", year: 2023, price: 31990, engine: "2.0L Diesel", horsepower: 122, transmission: "Manual", fuel: "Diesel", image: "images/caddy.jpg", description: "Versatile commercial vehicle perfect for business use." },
-        { id: 13, model: "Amarok", year: 2023, price: 49990, engine: "3.0L V6 Diesel", horsepower: 224, transmission: "Automatic", fuel: "Diesel", image: "images/amarok.jpg", description: "Robust pickup truck for work and adventure." },
-        { id: 14, model: "Taos", year: 2023, price: 32990, engine: "1.5L Turbo", horsepower: 158, transmission: "Automatic", fuel: "Petrol", image: "images/taos.jpg", description: "Compact crossover SUV with modern features." },
-        { id: 15, model: "Atlas", year: 2023, price: 41990, engine: "2.0L Turbo", horsepower: 235, transmission: "Automatic", fuel: "Petrol", image: "images/atlas.jpg", description: "Large family SUV with three rows of seating." }
-      ];
-
-      filteredCars = [...cars];
-      window.filteredCars = filteredCars;
-      renderCars(filteredCars);
-      updateFavoritesCount();
-      updateCompareCount();
-    }
+    filteredCars = [...cars];
+    window.filteredCars = filteredCars;
+    renderCars(filteredCars);
+    updateFavoritesCount();
+    updateCompareCount();
   }
 
 
 
-  // Save favorites to server
-  async function saveFavorites() {
-    try {
-      await fetch('/api/favorites', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ favorites })
-      });
-    } catch (error) {
-      console.error('Error saving favorites:', error);
-      // Fallback to localStorage
-      localStorage.setItem('vwFavorites', JSON.stringify(favorites));
-    }
+  // Save favorites to localStorage
+  function saveFavorites() {
+    localStorage.setItem('vwFavorites', JSON.stringify(favorites));
   }
 
-  // Save compare list to server
-  async function saveCompare() {
-    try {
-      await fetch('/api/compare', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ compare: compareList })
-      });
-    } catch (error) {
-      console.error('Error saving compare list:', error);
-      // Fallback to localStorage
-      localStorage.setItem('vwCompare', JSON.stringify(compareList));
-    }
+  // Save compare list to localStorage
+  function saveCompare() {
+    localStorage.setItem('vwCompare', JSON.stringify(compareList));
   }
 
   function renderCars(carsToRender) {
@@ -178,7 +138,6 @@ document.addEventListener('DOMContentLoaded', function() {
           <p>${lang ? lang.engine : 'Engine'}: ${car.engine}</p>
           <p>${lang ? lang.horsepower : 'Horsepower'}: ${car.horsepower} hp</p>
           <p>${lang ? lang.fuel : 'Fuel'}: ${car.fuel}</p>
-          ${car.averageRating ? `<p>${lang ? lang.rating : 'Rating'}: ⭐ ${car.averageRating} (${car.reviewCount} ${lang ? lang.reviews : 'reviews'})</p>` : ''}
           <button onclick="showCarDetails(${car.id})">${lang ? lang.viewDetails : 'View Details'}</button>
         </div>
       `;

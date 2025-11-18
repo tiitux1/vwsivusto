@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: volkswagen-model-finder
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false # Set this in Render dashboard or use MongoDB Atlas
+      - key: PORT
+        fromService:
+          type: web
+          property: port

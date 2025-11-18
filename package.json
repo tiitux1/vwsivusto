@@ -2,13 +2,10 @@
   "name": "volkswagen-model-finder",
   "version": "1.0.0",
   "description": "A modern React/Next.js web app to find and compare Volkswagen car models",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "export": "next export"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "dependencies": {
     "next": "^14.0.0",

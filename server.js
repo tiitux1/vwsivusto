@@ -10,7 +10,18 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('.')); // Serve static files from current directory
+app.use(express.static(path.join(__dirname))); // Serve static files from project root (index.html, assets)
+
+// serve index.html at root and fallback for non-API routes (SPA friendly)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.get('*', (req, res) => {
+  // let API routes return their own 404s
+  if (req.path.startsWith('/api/')) return res.status(404).end();
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 // MongoDB connection
 const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/volkswagen-db';
