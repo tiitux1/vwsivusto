@@ -393,6 +393,7 @@ header {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.8);
+  -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
 }
 
@@ -972,6 +973,38 @@ header {
 
 .dark-mode .specs-table tr:nth-child(even) {
   background: rgba(255, 255, 255, 0.1);
+}
+
+/* Dark mode for header buttons */
+.dark-mode .language-btn {
+  background: linear-gradient(135deg, var(--vw-dark-gray), var(--vw-silver));
+  color: var(--vw-white);
+}
+
+.dark-mode .quiz-btn {
+  background: linear-gradient(135deg, #ff6b35, #f7931e);
+  color: var(--vw-white);
+}
+
+.dark-mode .dark-mode-btn {
+  background: linear-gradient(135deg, var(--vw-dark-gray), var(--vw-silver));
+  color: var(--vw-white);
+}
+
+.dark-mode .calculator-btn {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: var(--vw-white);
+}
+
+.dark-mode .favorites-btn, .dark-mode .compare-btn {
+  background: linear-gradient(135deg, var(--vw-light-gray), var(--vw-dark-gray));
+  color: var(--vw-white);
+  border-color: var(--vw-silver);
+}
+
+.dark-mode .clear-btn {
+  background: linear-gradient(135deg, var(--vw-red), #ff4444);
+  color: var(--vw-white);
 }
 
 /* Responsive Design */
