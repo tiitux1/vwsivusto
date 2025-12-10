@@ -22,7 +22,7 @@ const cars = [
     horsepower: 150,
     transmission: "Manual",
     fuel: "Petrol",
-    image: "images/passat-lol.jpg",
+    image: "images/passatti.jpg",
     description: "Comfortable family sedan with modern features."
   },
   {
